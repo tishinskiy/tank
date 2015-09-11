@@ -1,17 +1,48 @@
 var canvas, ctx, w, h, x = 0, y = 0, plan;
 
+var leftR = false;
+var rightR = false;
+var frontM = false;
+var backM = false;
+
 plan = {
-	points: [[-30, -15],[30, 0],[-30, 15],[-15, 0]],
-	center: [150, 150],
-	angle: 0
+	points: [
+		[-10, -10],
+		[10, -10],
+		[10, -2],
+		[30, -2],
+		[30, 2],
+		[10, 2],
+		[10, 10],
+		[-10, 10],
+	],
+	center: [50, 50],
+	angle: 0,
+	speed: 5
 }
 baza = {
-	points:[[-15, -15],[-15, 15],[15, 15],[15, 10],[10, 10],[15, 0],[10, -10],[15, -10],[15, -15]],
+	points:[
+		[15, 15],
+		[15, 10],
+		[10, 10],
+		[15, 0],
+		[10, -10],
+		[15, -10],
+		[15, -15],
+		[-15, -15],
+		[-15, -10],
+		[-10, -10],
+		[-10, 10],
+		[-15, 10],
+		[-15, 15],
+	],
 	center:[50, 50],
-	angle: 0
+	angle: 0,
+	speed: 5
 }
 var w = $("#canvas").width();
 var h = $("#canvas").height();
+console.log(h);
 var xPos = w/2;
 var yPos = h/2;
 var mouseWhere = false;
@@ -25,10 +56,27 @@ $("#canvas").mousemove(function(event) {
 	y = event.pageY - $(this).offset().top;
 });
 
+window.onkeydown = function(e){
+	e = e ? e : window.event;
+	if(e.keyCode == 65) {leftR = true};
+	if(e.keyCode == 68) {rightR =true};
+	if(e.keyCode == 87) {frontM = true};
+	if(e.keyCode == 83) {backM =true};
+}
+window.onkeyup = function(e){
+	e = e ? e : window.event;
+	if(e.keyCode == 65) {leftR = false};
+	if(e.keyCode == 68) {rightR =false};
+	if(e.keyCode == 87) {frontM = false};
+	if(e.keyCode == 83) {backM =false};
+}
+
 
 function init() {
 	canvas = document.getElementById("canvas");
 	ctx = canvas.getContext('2d');
+	canvas.width = w;
+	canvas.height = h;
 }
 
 function angleValue(obj) {
@@ -37,12 +85,15 @@ function angleValue(obj) {
 	obj.angle = a;
 }
 
-function objectMove(obj) {
-	xp = obj.center[0] + tSpeed * (Math.cos(obj.angle));
-	yp = obj.center[1] + tSpeed * (Math.sin(obj.angle));
+function objectMove(obj, course) {
+
+	if(!course) {course = 1;}
+
+	xp = obj.center[0] + (obj.speed * course) * (Math.cos(obj.angle));
+	yp = obj.center[1] + (obj.speed * course) * (Math.sin(obj.angle));
+
 	obj.center[0] =xp;
 	obj.center[1] =yp;
-
 }
 
 function objectRotate(obj) {
@@ -65,7 +116,12 @@ function objectRotate(obj) {
 var drawObject = function(obj, bg, a) {
 
 
-	if (mouseWhere == true) {objectMove(obj);}
+	// if (mouseWhere == true) {objectMove(obj);}
+
+	if (leftR == true) {baza.angle -= 3 * Math.PI / 180;}
+	if (rightR == true) {baza.angle += 3 * Math.PI / 180;}
+	if (frontM == true) {objectMove(baza);}
+	if (backM == true) {objectMove(baza, -1);}
 
 	if (a == "auto") {angleValue(obj)}
 
@@ -73,6 +129,7 @@ var drawObject = function(obj, bg, a) {
 
 	ctx.fillStyle = bg;
 	ctx.beginPath();
+
 
 	objP.forEach(function(item, i, arr) {
 		ctx.lineTo(obj.center[0] + item[0], obj.center[1] + item[1]);
@@ -98,12 +155,13 @@ var draw = function() {
 
 	return function(){
 		ctx.clearRect(-20, -20, w+20, h+20);
-		drawObject(baza, "#cc8800", "auto");
+		drawObject(baza, "#cc8800");
 		drawObject(plan, "#364700", "auto");
-		angle+=1;
+		plan.center = baza.center;
+		// angle+=1;
 	}
 
 };
 
 init();
-setInterval(draw(),100);
+setInterval(draw(),40);
