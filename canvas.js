@@ -1,55 +1,38 @@
-var canvas, ctx, w, h, x = 0, y = 0, plan;
+var canvas, ctx, w, h, x = 0, y = 0;
 
 var leftR = false;
 var rightR = false;
 var frontM = false;
 var backM = false;
 
-plan = {
-	points: [
-		[-10, -10],
-		[10, -10],
-		[10, -2],
-		[30, -2],
-		[30, 2],
-		[10, 2],
-		[10, 10],
-		[-10, 10],
-	],
+var plan = {
+	points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10],],
 	center: [50, 50],
 	angle: 0,
-	speed: 5
+	bg:"#cc8800",
+	speed: 5,
 }
-baza = {
-	points:[
-		[15, 15],
-		[15, 10],
-		[10, 10],
-		[15, 0],
-		[10, -10],
-		[15, -10],
-		[15, -15],
-		[-15, -15],
-		[-15, -10],
-		[-10, -10],
-		[-10, 10],
-		[-15, 10],
-		[-15, 15],
-	],
+var baza = {
+	points:[[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
 	center:[50, 50],
 	angle: 0,
-	speed: 5
+	bg:"#364700",
+	speed: 3
 }
+var bulet = {
+	points: [[0, 0], [5,0]],
+	bg:"#FF3802",
+	center:[],
+	angle: 0,
+	speed: 50,
+	shoot :[]
+}
+
+
 var w = $("#canvas").width();
 var h = $("#canvas").height();
-console.log(h);
-var xPos = w/2;
-var yPos = h/2;
-var mouseWhere = false;
-var tSpeed = 5;
 
-$("#canvas").mousedown(function(event) {mouseWhere = true;});
-$("#canvas").mouseup(function(event) {mouseWhere = false;});
+
 
 $("#canvas").mousemove(function(event) {
 	x = event.pageX - $(this).offset().left;
@@ -71,6 +54,21 @@ window.onkeyup = function(e){
 	if(e.keyCode == 83) {backM =false};
 }
 
+$("#canvas").mousedown(function(event) {
+	bc = plan.center;
+	bulet.shoot = [x,y];
+	bulet.angle = plan.angle;
+	bulet.center =[plan.center[0] + 30 * (Math.cos(bulet.angle)), plan.center[1] + 30 * (Math.sin(bulet.angle))];
+});
+
+function drawShoot() {
+	drawObject(bulet);
+	var xpb = bulet.center[0] + bulet.speed * (Math.cos(bulet.angle));
+	var ypb = bulet.center[1] + bulet.speed * (Math.sin(bulet.angle));
+
+	bulet.center[0] =xpb;
+	bulet.center[1] =ypb;
+}
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -113,10 +111,7 @@ function objectRotate(obj) {
 
 }
 
-var drawObject = function(obj, bg, a) {
-
-
-	// if (mouseWhere == true) {objectMove(obj);}
+var drawObject = function(obj, a) {
 
 	if (leftR == true) {baza.angle -= 3 * Math.PI / 180;}
 	if (rightR == true) {baza.angle += 3 * Math.PI / 180;}
@@ -127,7 +122,7 @@ var drawObject = function(obj, bg, a) {
 
 	objP = objectRotate(obj);
 
-	ctx.fillStyle = bg;
+	ctx.fillStyle = obj.bg;
 	ctx.beginPath();
 
 
@@ -144,20 +139,12 @@ var drawObject = function(obj, bg, a) {
 
 
 var draw = function() {
-
-	var angle = 0;
-
-	console.log(22);
-
-	function inRad(num) {
-		return num * Math.PI / 180;
-	}
-
 	return function(){
 		ctx.clearRect(-20, -20, w+20, h+20);
-		drawObject(baza, "#cc8800");
-		drawObject(plan, "#364700", "auto");
+		drawObject(baza);
 		plan.center = baza.center;
+		drawObject(plan, "auto");
+		if(bulet.shoot.length > 0) {drawShoot(bulet)}
 		// angle+=1;
 	}
 
