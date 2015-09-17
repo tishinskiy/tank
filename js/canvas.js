@@ -86,9 +86,8 @@ window.onkeyup = function(e){
 }
 
 $("#canvas").mousedown(function(event) {
-	bulet[inc] = Object.create(buletProto).constructor([plan.center[0], plan.center[0]], [plan.center[0] + 30 * (Math.cos(plan.angle)), plan.center[1] + 30 * (Math.sin(plan.angle))], plan.angle);
+	bulet[inc] = Object.create(buletProto).constructor([plan.center[0], plan.center[1]], [plan.center[0] + 30 * (Math.cos(plan.angle)), plan.center[1] + 30 * (Math.sin(plan.angle))], plan.angle);
 	inc++;
-	console.log(bulet);
 });
 
 function init() {
@@ -107,6 +106,7 @@ function angleValue(obj) {
 function buletDell(obj) {
 	if(Math.sqrt(Math.pow(Math.abs(obj.center[0] - obj.startP[0]), 2) + Math.pow(Math.abs(obj.center[1] - obj.startP[1]), 2)) > 500) {
 		bulet.splice(bulet.indexOf(obj), 1);
+
 	}
 }
 
@@ -164,7 +164,6 @@ var draw = function() {
 				arr[i].draw();
 			});
 		}
-	console.log(bulet.length);
 	}
 };
 

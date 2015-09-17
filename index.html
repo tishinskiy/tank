@@ -4,28 +4,31 @@
 	<meta charset="UTF-8">
 	<title>Document</title>
 	<!-- // <script src="scope.js"></script> -->
+	<style>
+	* {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+		width: 100%;
+		box-sizing: border-box;
+		font-size: 0;
+	}
+	html, body {
+	}
+	body {
+		background: #222;
+	}
+		#canvas {
+			background: #777;
+			border: 0;
+		}
+	</style>
 </head>
 <body>
-<style>
-* {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-	width: 100%;
-	box-sizing: border-box;
-}
-html, body {
-}
-body {
-	background: #222;
-}
-	#canvas {
-		background: #777;
-		border: 0;
-	}
-</style>
+
 	<canvas id="canvas"></canvas>
-	<script src="jquery.js"></script>
-	<script src="canvas.js"></script>
+
 </body>
+	<script src="js/jquery.js"></script>
+	<script src="js/canvas.js"></script>
 </html>
