@@ -46,7 +46,10 @@ var baza = {
 		if (backM == true) {objectMove(this, -1);}
 		objectRotate(this);
 		objectShadow(this)
-		impact();
+		a = impact(this)
+		if(a.length) {
+			pushTank(a);
+		};
 		drawObject(this);
 	},
 	speed: 7,
@@ -78,20 +81,26 @@ var boxProto = {
 
 var bulletProto = {
 	points: [[-10, -1], [-10, 1], [10,1], [10,-1]],
-	// grad: 'red',
 	bg: "red",
 	bColor: "transparent",
 	speed: 20,
 	shoot:[],
-	steps: 0,
+	steps: 30,
 	shadow:[],
 	rPoints: [],
 	draw:function(){
 		objectMove(this);
 		objectRotate(this);
+		objectShadow(this)
+		a = impact(this);
+		if (a.length) {
+			objectDel(bullet, bullet.indexOf(this));
+			objectDel(box, a);
+			box.push(Object.create(boxProto).constructor([getRandomInt(50, w-50), getRandomInt(50, h-50)]));
+		};
 		drawObject(this);
 		bulletDell(this);
-		this.steps++;
+		this.steps--;
 	},
 	constructor: function(center, angle) {
 		this.center = center;
@@ -119,7 +128,7 @@ boxes = [
 ];
 
 boxes.forEach(function(item, i, arr) {
-	box[i] = Object.create(boxProto).constructor(item);
+	box.push(Object.create(boxProto).constructor(item));
 });
 
 
@@ -146,9 +155,13 @@ window.onkeyup = function(e){
 }
 
 $("#canvas").mousedown(function(event) {
-	bullet[inc] = Object.create(bulletProto).constructor([plan.center[0] + 30 * (Math.cos(plan.angle)), plan.center[1] + 30 * (Math.sin(plan.angle))], plan.angle);
-	inc++;
+	bullet.push(Object.create(bulletProto).constructor([plan.center[0] + 30 * (Math.cos(plan.angle)), plan.center[1] + 30 * (Math.sin(plan.angle))], plan.angle));
 });
+
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 
 function init() {
 	canvas = document.getElementById("canvas");
@@ -164,7 +177,7 @@ function angleValue(obj) {
 }
 
 function bulletDell(obj) {
-	if(obj.steps > 50) {
+	if(obj.steps <= 0) {
 		objectDel(bullet, bullet.indexOf(obj));
 	}
 }
@@ -173,43 +186,53 @@ function objectDel(arr, id) {
 		arr.splice(id, 1);
 }
 
-var impact = function () {
+var impact = function (obj) {
+	boxArr = [];
 
 	box.forEach(function(item, i, arr) {
 		
 		if (
-			(
-				(arr[i].shadow[0][0] < baza.shadow[0][1]) && (arr[i].shadow[0][1] > baza.shadow[0][1]) ||
-				(arr[i].shadow[0][1] > baza.shadow[0][0]) && (arr[i].shadow[0][0] < baza.shadow[0][0])
-			)
+				(
+					(arr[i].shadow[0][0] < obj.shadow[0][1]) && (arr[i].shadow[0][1] > obj.shadow[0][1]) ||
+					(arr[i].shadow[0][1] > obj.shadow[0][0]) && (arr[i].shadow[0][0] < obj.shadow[0][0])
+				)
 			&& (
-				(arr[i].shadow[1][0] < baza.shadow[1][1]) && (arr[i].shadow[1][1] > baza.shadow[1][1]) ||
-				(arr[i].shadow[1][1] > baza.shadow[1][0]) && (arr[i].shadow[1][0] < baza.shadow[1][0])
+				(arr[i].shadow[1][0] < obj.shadow[1][1]) && (arr[i].shadow[1][1] > obj.shadow[1][1]) ||
+				(arr[i].shadow[1][1] > obj.shadow[1][0]) && (arr[i].shadow[1][0] < obj.shadow[1][0])
 				)
 			)
-		{
 
-			a =  (Math.atan((baza.center[1] - arr[i].center[1]) / (baza.center[0] - arr[i].center[0])));
-			if( (baza.center[0] - arr[i].center[0]) < 0 ) { a = Math.PI + a; }
+			boxArr.push(i);
 
-			if ((a >= -0.7854) && (a < 0.7854)) {//right
-				baza.center[0] = baza.center[0] + baza.speed * Math.cos(a);
-				} 
+	});
+	return (boxArr);
 
-			if ((a >= 0.7854) && (a < 2.3562)) { //bottom
-				baza.center[1] = baza.center[1] + baza.speed * Math.sin(a);
-			}
+}
 
-			if ((a >= 2.3562) && (a < 3.9270)) { //left
-				baza.center[0] = baza.center[0] + baza.speed * Math.cos(a);
-			}
+function pushTank(boxes) {
 
-			if (((a >= 3.9270) && (a < 4.7124)) || (a >= -1.5708) && (a < -0.7854) ) { //top
-				baza.center[1] = baza.center[1] + baza.speed * Math.sin(a);
-			}
+	boxes.forEach(function(item, i, arr) {
+
+		a =  (Math.atan((baza.center[1] - box[item].center[1]) / (baza.center[0] - box[item].center[0])));
+
+		if( (baza.center[0] - box[item].center[0]) < 0 ) { a = Math.PI + a; }
+
+		if ((a >= -0.7854) && (a < 0.7854)) {//right
+			baza.center[0] = baza.center[0] - baza.speed * Math.cos(baza.angle);
+			} 
+
+		if ((a >= 0.7854) && (a < 2.3562)) { //bottom
+			baza.center[1] = baza.center[1] - baza.speed * Math.sin(baza.angle);
+		}
+
+		if ((a >= 2.3562) && (a < 3.9270)) { //left
+			baza.center[0] = baza.center[0] - baza.speed * Math.cos(baza.angle);
+		}
+
+		if (((a >= 3.9270) && (a < 4.7124)) || (a >= -1.5708) && (a < -0.7854) ) { //top
+			baza.center[1] = baza.center[1] - baza.speed * Math.sin(baza.angle);
 		}
 	});
-
 }
 
 function objectMove(obj, course) {
@@ -281,14 +304,14 @@ var drawObject = function(obj, a) {
 var draw = function() {
 	return function(){
 		ctx.clearRect(-20, -20, w+20, h+20);
-		if (box.length > 0) {
+		if (box.length) {
 			box.forEach(function(item, i, arr) {
 				arr[i].draw();
 			});
 		}
 		baza.draw();
 		plan.draw();
-		if (bullet.length > 0) {
+		if (bullet.length) {
 			bullet.forEach(function(item, i, arr) {
 				arr[i].draw();
 			});
@@ -297,5 +320,5 @@ var draw = function() {
 };
 
 init();
-console.log(box);
+
 setInterval(draw(),35);
