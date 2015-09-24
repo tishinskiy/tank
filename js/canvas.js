@@ -12,54 +12,63 @@ var inc = 0;
 
 var bullet = [];
 
-var plan = {
-	points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10],],
+var tank = {
 	center: [50, 50],
-	angle: 0,
-	bg:"#cc8800",
-	bColor: "#000",
-	rPoints: [],
-	draw:function(){
-		a =  (Math.atan((y - this.center[1]) / (x - this.center[0])));
-		if( (x - this.center[0]) < 0 ) { a = Math.PI + a; }
-		this.angle = a;
-		this.center = baza.center;
-		objectRotate(this);
-		drawObject(this);
 
+	plan: {
+		points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10],],
+		angle: 0,
+		bg:"#cc8800",
+		bColor: "#000",
+		rPoints: [],
+		draw:function(){
+			this.center = tank.center;
+			a =  (Math.atan((y - this.center[1]) / (x - this.center[0])));
+			if( (x - this.center[0]) < 0 ) { a = Math.PI + a; }
+			this.angle = a;
+			objectRotate(this);
+			drawObject(this);
+
+		},
+		shadow:[]
 	},
-	shadow:[]
+
+	baza: {
+		points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
+		angle: 0,
+		bg:"#364700",
+		bColor: "#000",
+		rPoints: [],
+		speedR: 5,
+		draw:function(){
+			this.center = tank.center;
+			if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
+			if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
+			if (frontM == true) {objectMove(tank);}
+			if (backM == true) {objectMove(tank, -1);}
+
+			objectShadow(this)
+			objectRotate(this);
+			a = impact(this)
+			if(a.length) {
+				pushTank(a);
+			};
+			drawObject(this);
+		},
+		speed: 7,
+		shadow:[]
+	},
+	draw: function() {
+		this.baza.draw();
+		this.plan.draw();
+	},
 }
 
-var baza = {
-	points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
-	center:[50, 50],
-	angle: 0,
-	bg:"#364700",
-	bColor: "#000",
-	rPoints: [],
-	speedR: 5,
-	draw:function(){
-		if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
-		if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
-		if (frontM == true) {objectMove(this);}
-		if (backM == true) {objectMove(this, -1);}
-		objectRotate(this);
-		objectShadow(this)
-		a = impact(this)
-		if(a.length) {
-			pushTank(a);
-		};
-		drawObject(this);
-	},
-	speed: 7,
-	shadow:[]
+user = Object.create(tank)
 
-}
 
 var boxProto = {
 	points: [[-25, -25], [25, -25], [25, 25], [-25, 25]],
-	// center: [250, 360],
 	angle: 0,
 	bg:"#FF6D1D",
 	bColor: "#000",
@@ -155,7 +164,7 @@ window.onkeyup = function(e){
 }
 
 $("#canvas").mousedown(function(event) {
-	bullet.push(Object.create(bulletProto).constructor([plan.center[0] + 30 * (Math.cos(plan.angle)), plan.center[1] + 30 * (Math.sin(plan.angle))], plan.angle));
+	bullet.push(Object.create(bulletProto).constructor([tank.plan.center[0] + 30 * (Math.cos(tank.plan.angle)), tank.plan.center[1] + 30 * (Math.sin(tank.plan.angle))], tank.plan.angle));
 });
 
 function getRandomInt(min, max) {
@@ -213,24 +222,24 @@ function pushTank(boxes) {
 
 	boxes.forEach(function(item, i, arr) {
 
-		a =  (Math.atan((baza.center[1] - box[item].center[1]) / (baza.center[0] - box[item].center[0])));
+		a =  (Math.atan((tank.center[1] - box[item].center[1]) / (tank.center[0] - box[item].center[0])));
 
-		if( (baza.center[0] - box[item].center[0]) < 0 ) { a = Math.PI + a; }
+		if( (tank.center[0] - box[item].center[0]) < 0 ) { a = Math.PI + a; }
 
 		if ((a >= -0.7854) && (a < 0.7854)) {//right
-			baza.center[0] = baza.center[0] - baza.speed * Math.cos(baza.angle);
+			tank.center[0] = tank.center[0] - tank.baza.speed * Math.cos(tank.baza.angle);
 			} 
 
 		if ((a >= 0.7854) && (a < 2.3562)) { //bottom
-			baza.center[1] = baza.center[1] - baza.speed * Math.sin(baza.angle);
+			tank.center[1] = tank.center[1] - tank.baza.speed * Math.sin(tank.baza.angle);
 		}
 
 		if ((a >= 2.3562) && (a < 3.9270)) { //left
-			baza.center[0] = baza.center[0] - baza.speed * Math.cos(baza.angle);
+			tank.center[0] = tank.center[0] - tank.baza.speed * Math.cos(tank.baza.angle);
 		}
 
 		if (((a >= 3.9270) && (a < 4.7124)) || (a >= -1.5708) && (a < -0.7854) ) { //top
-			baza.center[1] = baza.center[1] - baza.speed * Math.sin(baza.angle);
+			tank.center[1] = tank.center[1] - tank.baza.speed * Math.sin(tank.baza.angle);
 		}
 	});
 }
@@ -239,8 +248,8 @@ function objectMove(obj, course) {
 
 	if(!course) {course = 1;}
 
-	xp = obj.center[0] + (obj.speed * course) * (Math.cos(obj.angle));
-	yp = obj.center[1] + (obj.speed * course) * (Math.sin(obj.angle));
+	xp = obj.center[0] + (obj.baza.speed * course) * (Math.cos(obj.baza.angle));
+	yp = obj.center[1] + (obj.baza.speed * course) * (Math.sin(obj.baza.angle));
 
 	if (obj.center[0] > w) {xp = 0;}
 	if (obj.center[1] > h) {yp = 0;}
@@ -309,8 +318,7 @@ var draw = function() {
 				arr[i].draw();
 			});
 		}
-		baza.draw();
-		plan.draw();
+		user.draw();
 		if (bullet.length) {
 			bullet.forEach(function(item, i, arr) {
 				arr[i].draw();
