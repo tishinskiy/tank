@@ -14,6 +14,14 @@ var bullet = [];
 
 var tank = {
 	center: [50, 50],
+	points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
+	angle: 0,
+	bg:"#364700",
+	bColor: "#000",
+	rPoints: [],
+	speedR: 5,
+	speed: 7,
+	shadow:[],
 
 	plan: {
 		points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10],],
@@ -33,33 +41,19 @@ var tank = {
 		shadow:[]
 	},
 
-	baza: {
-		points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
-		angle: 0,
-		bg:"#364700",
-		bColor: "#000",
-		rPoints: [],
-		speedR: 5,
-		draw:function(){
-			this.center = tank.center;
-			if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
-			if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
-			if (frontM == true) {objectMove(tank);}
-			if (backM == true) {objectMove(tank, -1);}
-
-			objectShadow(this)
-			objectRotate(this);
-			a = impact(this)
-			if(a.length) {
-				pushTank(a);
-			};
-			drawObject(this);
-		},
-		speed: 7,
-		shadow:[]
-	},
 	draw: function() {
-		this.baza.draw();
+		this.center = tank.center;
+		if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
+		if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
+		if (frontM == true) {objectMove(this);}
+		if (backM == true) {objectMove(this, -1);}
+		objectShadow(this)
+		objectRotate(this);
+		a = impact(this)
+		if(a.length) {
+			pushTank(a, this);
+		};
+		drawObject(this);
 		this.plan.draw();
 	},
 }
@@ -218,7 +212,7 @@ var impact = function (obj) {
 
 }
 
-function pushTank(boxes) {
+function pushTank(boxes, tank) {
 
 	boxes.forEach(function(item, i, arr) {
 
@@ -227,19 +221,19 @@ function pushTank(boxes) {
 		if( (tank.center[0] - box[item].center[0]) < 0 ) { a = Math.PI + a; }
 
 		if ((a >= -0.7854) && (a < 0.7854)) {//right
-			tank.center[0] = tank.center[0] - tank.baza.speed * Math.cos(tank.baza.angle);
+			tank.center[0] = tank.center[0] + tank.speed * Math.abs(Math.cos(tank.angle));
 			} 
 
 		if ((a >= 0.7854) && (a < 2.3562)) { //bottom
-			tank.center[1] = tank.center[1] - tank.baza.speed * Math.sin(tank.baza.angle);
+			tank.center[1] = tank.center[1] + tank.speed * Math.abs(Math.sin(tank.angle));
 		}
 
 		if ((a >= 2.3562) && (a < 3.9270)) { //left
-			tank.center[0] = tank.center[0] - tank.baza.speed * Math.cos(tank.baza.angle);
+			tank.center[0] = tank.center[0] - tank.speed * Math.abs(Math.cos(tank.angle));
 		}
 
 		if (((a >= 3.9270) && (a < 4.7124)) || (a >= -1.5708) && (a < -0.7854) ) { //top
-			tank.center[1] = tank.center[1] - tank.baza.speed * Math.sin(tank.baza.angle);
+			tank.center[1] = tank.center[1] - tank.speed * Math.abs(Math.sin(tank.angle));
 		}
 	});
 }
@@ -248,8 +242,8 @@ function objectMove(obj, course) {
 
 	if(!course) {course = 1;}
 
-	xp = obj.center[0] + (obj.baza.speed * course) * (Math.cos(obj.baza.angle));
-	yp = obj.center[1] + (obj.baza.speed * course) * (Math.sin(obj.baza.angle));
+	xp = obj.center[0] + (obj.speed * course) * (Math.cos(obj.angle));
+	yp = obj.center[1] + (obj.speed * course) * (Math.sin(obj.angle));
 
 	if (obj.center[0] > w) {xp = 0;}
 	if (obj.center[1] > h) {yp = 0;}
