@@ -115,7 +115,7 @@ var bulletProto = {
 
 var box = [];
 
-boxes = [ //ящики
+boxes = [
 	[100, 100],
 	[100, 200],
 	[100, 300],
