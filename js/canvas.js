@@ -10,27 +10,16 @@ var h = $("#canvas").height();
 
 var inc = 0;
 
-var bullet = [];
 
-var tank = {
-	center: [50, 50],
-	points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
-	angle: 0,
-	bg:"#364700",
-	bColor: "#000",
-	rPoints: [],
-	speedR: 5,
-	speed: 7,
-	shadow:[],
-
-	plan: {
-		points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10],],
+var planProto = {
+		points: [[-10, -10],[10, -10],[10, -2],[30, -2],[30, 2],[10, 2],[10, 10],[-10, 10]],
 		angle: 0,
 		bg:"#cc8800",
 		bColor: "#000",
 		rPoints: [],
+		center: [50, 50],
+
 		draw:function(){
-			this.center = tank.center;
 			a =  (Math.atan((y - this.center[1]) / (x - this.center[0])));
 			if( (x - this.center[0]) < 0 ) { a = Math.PI + a; }
 			this.angle = a;
@@ -39,14 +28,26 @@ var tank = {
 
 		},
 		shadow:[]
-	},
+	};
+
+var tank = {
+	name: "tank",
+	center: [50, 50],
+	points: [[15, 15],[15, 10],[10, 10],[20, 0],[10, -10],[15, -10],[15, -15],[-15, -15],[-15, -10],[-10, -10],[-10, 10],[-15, 10],[-15, 15],],
+	angle: 0,
+	bg:"#364700",
+	bColor: "#000",
+	rPoints: [],
+	speedR: 5,
+	speed: 7,
+	kd: 20,
+	shootTime: 20,
+	shadow: [],
+	bullet: [],
+
 
 	draw: function() {
-		this.center = tank.center;
-		if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
-		if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
-		if (frontM == true) {objectMove(this);}
-		if (backM == true) {objectMove(this, -1);}
+		this.shootTime++;
 		objectShadow(this)
 		objectRotate(this);
 		a = impact(this)
@@ -55,10 +56,56 @@ var tank = {
 		};
 		drawObject(this);
 		this.plan.draw();
+		a = this;
+		if (this.bullet.length) {
+			this.bullet.forEach(function(item, i, arr) {
+				arr[i].draw(a);
+			});
+		}
+	},
+	constructor:function(name, center, angle, bg) {
+		this.plan = Object.create(planProto),
+		// this.bullet = [];
+		this.name = name;
+		this.center = center;
+		this.bg = bg;
+		this.angle = angle;
+		this.plan.center = center;
+		return this;
+	},
+
+	tankShoot:function() {
+		if (this.shootTime >= this.kd) {
+			this.bullet.push(Object.create(bulletProto).constructor([this.plan.center[0] + 30 * (Math.cos(this.plan.angle)), this.plan.center[1] + 30 * (Math.sin(this.plan.angle))], this.plan.angle));
+			this.shootTime = 0;
+		}
 	},
 }
 
-user = Object.create(tank)
+
+bot = Object.create(tank).constructor("bot", [500, 200], 0, "red");
+bot.kd = 50;
+bot.bullet = [];
+
+bot.draw = function(){
+
+	tank.draw.apply(this, arguments);
+	this.angle += 1*Math.PI/180;
+	if (this.shootTime >= this.kd) {
+		this.tankShoot();
+	}
+}
+
+user = Object.create(tank).constructor("user", [50, 50], 0, "green");
+user.bullet = [];
+user.draw = function(){
+	tank.draw.apply(this, arguments);
+	// this.center = tank.center;
+	if (leftR == true) {this.angle -= this.speedR * Math.PI / 180;}
+	if (rightR == true) {this.angle += this.speedR * Math.PI / 180;}
+	if (frontM == true) {objectMove(this);}
+	if (backM == true) {objectMove(this, -1);}
+}
 
 
 var boxProto = {
@@ -91,18 +138,18 @@ var bulletProto = {
 	steps: 30,
 	shadow:[],
 	rPoints: [],
-	draw:function(){
+	draw:function(obj){
 		objectMove(this);
 		objectRotate(this);
 		objectShadow(this)
 		a = impact(this);
 		if (a.length) {
-			objectDel(bullet, bullet.indexOf(this));
+			objectDel(obj.bullet, obj.bullet.indexOf(this));
 			objectDel(box, a);
 			box.push(Object.create(boxProto).constructor([getRandomInt(50, w-50), getRandomInt(50, h-50)]));
 		};
 		drawObject(this);
-		bulletDell(this);
+		bulletDell(obj, this);
 		this.steps--;
 	},
 	constructor: function(center, angle) {
@@ -113,27 +160,23 @@ var bulletProto = {
 
 }
 
+function bulletDell(tankModel, obj) {
+	if(obj.steps <= 0) {
+		objectDel(tankModel.bullet, tankModel.bullet.indexOf(obj));
+	}
+}
+
+function objectDel(arr, id) {
+	arr.splice(id, 1);
+}
+
 var box = [];
 
-boxes = [
-	[100, 100],
-	[100, 200],
-	[100, 300],
-	[100, 400],
-	[100, 500],
-	[100, 600],
-	[300, 100],
-	[300, 150],
-	[300, 200],
-	[300, 250],
-	[300, 300],
-	[300, 370],
-];
+boxes = [[100, 100], [100, 200], [100, 300], [100, 400], [100, 500], [100, 600], [300, 100], [300, 150], [300, 200], [300, 250], [300, 300], [300, 370],];
 
 boxes.forEach(function(item, i, arr) {
 	box.push(Object.create(boxProto).constructor(item));
 });
-
 
 
 
@@ -158,7 +201,7 @@ window.onkeyup = function(e){
 }
 
 $("#canvas").mousedown(function(event) {
-	bullet.push(Object.create(bulletProto).constructor([tank.plan.center[0] + 30 * (Math.cos(tank.plan.angle)), tank.plan.center[1] + 30 * (Math.sin(tank.plan.angle))], tank.plan.angle));
+	user.tankShoot();
 });
 
 function getRandomInt(min, max) {
@@ -179,19 +222,9 @@ function angleValue(obj) {
 	obj.angle = a;
 }
 
-function bulletDell(obj) {
-	if(obj.steps <= 0) {
-		objectDel(bullet, bullet.indexOf(obj));
-	}
-}
-
-function objectDel(arr, id) {
-		arr.splice(id, 1);
-}
-
 var impact = function (obj) {
-	boxArr = [];
 
+	boxArr = [];
 	box.forEach(function(item, i, arr) {
 		
 		if (
@@ -300,7 +333,6 @@ var drawObject = function(obj, a) {
 	ctx.stroke();
 	ctx.closePath();
 
-	// obj.shadow = objectShadow(objP, obj.center);
 }
 
 
@@ -313,11 +345,7 @@ var draw = function() {
 			});
 		}
 		user.draw();
-		if (bullet.length) {
-			bullet.forEach(function(item, i, arr) {
-				arr[i].draw();
-			});
-		}
+		bot.draw();
 	}
 };
 
