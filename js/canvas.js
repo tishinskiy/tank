@@ -226,7 +226,7 @@ var impact = function (obj) {
 
 	boxArr = [];
 	box.forEach(function(item, i, arr) {
-		
+
 		if (
 				(
 					(arr[i].shadow[0][0] < obj.shadow[0][1]) && (arr[i].shadow[0][1] > obj.shadow[0][1]) ||
@@ -255,7 +255,7 @@ function pushTank(boxes, tank) {
 
 		if ((a >= -0.7854) && (a < 0.7854)) {//right
 			tank.center[0] = tank.center[0] + tank.speed * Math.abs(Math.cos(tank.angle));
-			} 
+			}
 
 		if ((a >= 0.7854) && (a < 2.3562)) { //bottom
 			tank.center[1] = tank.center[1] + tank.speed * Math.abs(Math.sin(tank.angle));
