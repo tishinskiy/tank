@@ -82,19 +82,46 @@ var tank = {
 	},
 }
 
+var botProto = {
 
+	create: function(x,y){
+		bot = Object.create(tank).constructor("bot", [x, y], 0, "red");
+		bot.kd = 50;
+		bot.bullet = [];
+		bot.test = "2312313";
+		bot.draw_tank = function(){
+			 //tank.draw.apply(this, arguments);
+			 this.angle += 1*Math.PI/180;
+			 if (this.shootTime >= this.kd) {
+			 	this.tankShoot();
+			 }
+		};
+		return bot;
+	},
+}
+
+var bots = {};
+// bots['bot_1'] = botProto.create(500,200);
+
+for (var i = 0; i < 20; i++) {
+	bots[i] = botProto.create(getRandomInt(0,1000),getRandomInt(0,1000));
+	
+
+	
+};
+
+/*
 bot = Object.create(tank).constructor("bot", [500, 200], 0, "red");
 bot.kd = 50;
 bot.bullet = [];
 
-bot.draw = function(){
+bot1 = Object.create(tank).constructor("bot", [200, 400], 0, "red");
+bot1.kd = 50;
+bot1.bullet = [];*/
 
-	tank.draw.apply(this, arguments);
-	this.angle += 1*Math.PI/180;
-	if (this.shootTime >= this.kd) {
-		this.tankShoot();
-	}
-}
+//bots = [bot, bot1];
+
+
 
 user = Object.create(tank).constructor("user", [50, 50], 0, "green");
 user.bullet = [];
@@ -143,6 +170,7 @@ var bulletProto = {
 		objectRotate(this);
 		objectShadow(this)
 		a = impact(this);
+
 		if (a.length) {
 			objectDel(obj.bullet, obj.bullet.indexOf(this));
 			objectDel(box, a);
@@ -227,18 +255,23 @@ var impact = function (obj) {
 	boxArr = [];
 	box.forEach(function(item, i, arr) {
 
-		if (
-				(
-					(arr[i].shadow[0][0] < obj.shadow[0][1]) && (arr[i].shadow[0][1] > obj.shadow[0][1]) ||
-					(arr[i].shadow[0][1] > obj.shadow[0][0]) && (arr[i].shadow[0][0] < obj.shadow[0][0])
-				)
-			&& (
-				(arr[i].shadow[1][0] < obj.shadow[1][1]) && (arr[i].shadow[1][1] > obj.shadow[1][1]) ||
-				(arr[i].shadow[1][1] > obj.shadow[1][0]) && (arr[i].shadow[1][0] < obj.shadow[1][0])
-				)
-			)
+		console.log(arr[i]);
+		if(true){
+			if (
+					(
+						(arr[i].shadow[0][0] < obj.shadow[0][1]) && (arr[i].shadow[0][1] > obj.shadow[0][1]) ||
+						(arr[i].shadow[0][1] > obj.shadow[0][0]) && (arr[i].shadow[0][0] < obj.shadow[0][0])
+					)
+				&& (
+					(arr[i].shadow[1][0] < obj.shadow[1][1]) && (arr[i].shadow[1][1] > obj.shadow[1][1]) ||
+					(arr[i].shadow[1][1] > obj.shadow[1][0]) && (arr[i].shadow[1][0] < obj.shadow[1][0])
+					)
+				){
+				boxArr.push(i);
+			}	
+		}
 
-			boxArr.push(i);
+
 
 	});
 	return (boxArr);
@@ -344,11 +377,24 @@ var draw = function() {
 				arr[i].draw();
 			});
 		}
+		
+		for (key in bots) {
+		    bots[key].draw();
+		    bots[key].draw_tank();
+		}
+
+/*		bots.forEach(function(item, i, arr) {
+			arr[i].draw();
+			//conolse.log(arr[i]);
+		});*/
+
 		user.draw();
-		bot.draw();
+		// bot.draw();
+		// bot2.draw();
 	}
 };
+		console.log(bots);  //.draw();
 
 init();
 
-setInterval(draw(),35);
+setInterval(draw(),30);
