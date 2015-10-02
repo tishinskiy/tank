@@ -83,9 +83,9 @@ var tank = {
 }
 
 
-bot = Object.create(tank).constructor("bot", [500, 200], 0, "red");
-bot.kd = 50;
-bot.bullet = [];
+var bot = Object.create(tank).constructor("bot", [500, 200], 0, "red");
+	bot.kd = 50;
+	bot.bullet = [];
 
 bot.draw = function(){
 
@@ -95,6 +95,23 @@ bot.draw = function(){
 		this.tankShoot();
 	}
 }
+
+bot.constructor = function(center){
+	this.center = center;
+	this.plan = Object.create(planProto);
+	this.plan.center = center;
+	bullet = [];
+
+
+	return this;
+}
+
+var bots = [];
+
+bots[0] = Object.create(bot).constructor([450, 540]);
+
+
+bots[1] = Object.create(bot).constructor([250, 140]);
 
 user = Object.create(tank).constructor("user", [50, 50], 0, "green");
 user.bullet = [];
@@ -134,20 +151,20 @@ var bulletProto = {
 	bg: "red",
 	bColor: "transparent",
 	speed: 20,
-	shoot:[],
+	shoot: [],
 	steps: 30,
-	shadow:[],
+	shadow: [],
 	rPoints: [],
 	draw:function(obj){
 		objectMove(this);
 		objectRotate(this);
-		objectShadow(this)
-		a = impact(this);
-		if (a.length) {
-			objectDel(obj.bullet, obj.bullet.indexOf(this));
-			objectDel(box, a);
-			box.push(Object.create(boxProto).constructor([getRandomInt(50, w-50), getRandomInt(50, h-50)]));
-		};
+		// objectShadow(this)
+		// a = impact(this);
+		// if (a.length) {
+		// 	objectDel(obj.bullet, obj.bullet.indexOf(this));
+		// 	objectDel(box, a);
+		// 	// box.push(Object.create(boxProto).constructor([getRandomInt(50, w-50), getRandomInt(50, h-50)]));
+		// };
 		drawObject(this);
 		bulletDell(obj, this);
 		this.steps--;
@@ -233,8 +250,8 @@ var impact = function (obj) {
 					(arr[i].shadow[0][1] > obj.shadow[0][0]) && (arr[i].shadow[0][0] < obj.shadow[0][0])
 				)
 			&& (
-				(arr[i].shadow[1][0] < obj.shadow[1][1]) && (arr[i].shadow[1][1] > obj.shadow[1][1]) ||
-				(arr[i].shadow[1][1] > obj.shadow[1][0]) && (arr[i].shadow[1][0] < obj.shadow[1][0])
+					(arr[i].shadow[1][0] < obj.shadow[1][1]) && (arr[i].shadow[1][1] > obj.shadow[1][1]) ||
+					(arr[i].shadow[1][1] > obj.shadow[1][0]) && (arr[i].shadow[1][0] < obj.shadow[1][0])
 				)
 			)
 
@@ -345,7 +362,15 @@ var draw = function() {
 			});
 		}
 		user.draw();
-		bot.draw();
+		if (bots.length) {
+			bots.forEach(function(item, i, arr) {
+				arr[i].draw();
+			});
+		}
+
+console.log(bots[0].bullet.length);
+
+
 	}
 };
 
