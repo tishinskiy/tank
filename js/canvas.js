@@ -90,14 +90,15 @@ var botProto = {
 	create: function(x, y, name){
 		bot = Object.create(tank).constructor(name, [x, y], 0, "red");
 		bot.kd = 50;
-		bot.bullet = [];
+		// bot.bullet = [];
 		bot.test = "2312313";
 		bot.draw = function(){
-			 tank.draw.apply(this, arguments);
-			 this.angle += 1*Math.PI/180;
-			 if (this.shootTime >= this.kd) {
+			tank.draw.apply(this, arguments);
+			botMove(this);
+			if (this.shootTime >= this.kd) {
 				this.tankShoot();
-			 }
+			
+			}
 		};
 		return bot;
 	},
@@ -164,8 +165,6 @@ var bulletProto = {
 		a = impact(this);
 		if (a.length) {
 			this.parent.kill += a.length;
-			console.log(this.parent);
-			// console.log(a);
 			objectDel(obj.bullet, obj.bullet.indexOf(this));
 			objectDel(box, a);
 			// box.push(Object.create(boxProto).constructor([getRandomInt(50, w-50), getRandomInt(50, h-50)]));
@@ -228,6 +227,17 @@ $("#canvas").mousedown(function(event) {
 
 function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function botMove(obj) {
+	a = obj.center[0];
+	b = obj.center[1];
+	
+	if (a < b) {c = a / b / 10;} else {c = b / a / 10 * -1;}
+	obj.angle += c;
+
+	obj.speed = 5;
+	objectMove(obj);
 }
 
 
