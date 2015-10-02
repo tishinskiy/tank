@@ -90,7 +90,6 @@ var botProto = {
 	create: function(x, y, name){
 		bot = Object.create(tank).constructor(name, [x, y], 0, "red");
 		bot.kd = 50;
-		// bot.bullet = [];
 		bot.test = "2312313";
 		bot.draw = function(){
 			tank.draw.apply(this, arguments);
@@ -233,11 +232,12 @@ function botMove(obj) {
 	a = obj.center[0];
 	b = obj.center[1];
 	
-	if (a < b) {c = a / b / 10;} else {c = b / a / 10 * -1;}
-	obj.angle += c;
+	if (a < b) {c = a / b / 10;} else {c = (b+10) / a / 10 * -1;}
+	obj.angle += Math.sin(c);
 
-	obj.speed = 5;
+	obj.speed += ((obj.maxSpeed-2 + Math.sin(c)*10 - obj.speed) / 10 );
 	objectMove(obj);
+
 }
 
 
