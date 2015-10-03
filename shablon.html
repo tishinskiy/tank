@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Rotate</title>
+	<style>
+		#canvas {
+			border: 1px solid #ccc;
+		}
+	</style>
+</head>
+<body>
+	<canvas id ="canvas" width="500" height="500"></canvas>
+</body>
+<script>
+
+	var w = 500, h = 500;
+
+
+	function init() {
+		canvas = document.getElementById("canvas");
+		ctx = canvas.getContext('2d');
+		canvas.width = w;
+		canvas.height = h;
+	}
+
+	var draw = function() {
+		return function(){
+			ctx.clearRect(-20, -20, w+20, h+20);
+		}
+	};
+
+	init();
+	setInterval(draw(),30);
+
+</script>
+</html>
